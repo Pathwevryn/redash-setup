@@ -124,5 +124,62 @@
 5. klik `env-docker` > `stacks` > `add stacks`
 6. copas ini ke dalam field `web editor`
 ```
+version: "3"
+services:
+  postgres:
+    image: postgres:12-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: redash
+      POSTGRES_USER: redash
+      POSTGRES_DB: redash
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - redash-net
 
+  redis:
+    image: redis:7-alpine
+    restart: always
+    networks:
+      - redash-net
+
+  redash:
+    image: redash/redash:latest
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      REDASH_DATABASE_URL: "postgresql://redash:redash@postgres/redash"
+      REDASH_REDIS_URL: "redis://redis:6379/0"
+      REDASH_SECRET_KEY: "hogehoge"
+      REDASH_COOKIE_SECRET: "mogemoge"
+      REDASH_WEB_WORKERS: 2
+    ports:
+      - "5000:5000"
+    restart: always
+    networks:
+      - redash-net
+
+  worker:
+    image: redash/redash:latest
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      REDASH_DATABASE_URL: "postgresql://redash:redash@postgres/redash"
+      REDASH_REDIS_URL: "redis://redis:6379/0"
+      REDASH_SECRET_KEY: "hogehoge"
+      REDASH_COOKIE_SECRET: "mogemoge"
+    command: worker
+    restart: always
+    networks:
+      - redash-net
+
+volumes:
+  postgres-data:
+
+networks:
+  redash-net:
+    external: true
 ```
