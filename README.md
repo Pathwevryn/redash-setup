@@ -12,8 +12,8 @@
 2. Distro Linux Debian 12.11.10 (https://www.debian.org/distrib/)
 
 ### INSTALASI VM
-1. Install Oracle VirtualBox
-2. Spesifikasi yang saya gunakan:
+* Install Oracle VirtualBox
+* Spesifikasi yang saya gunakan:
    | <!-- -->    | <!-- -->    |
    | -------- | ------- |
    | OS | debian-12.11.10-amd64-netinst.iso |
@@ -21,100 +21,91 @@
    | Processor | 2 CPU |
    | HDD | 20GB |
    | <!-- -->    | <!-- -->    |
-4. Install Debian 12, saya memilih installasi minimalis, hanya menggunakan `standard system utilities`
-5. Setelah berhasil install Debian 12, power off VMnya terlebih dahulu
-6. Set Network nya:
+* Install Debian 12, saya memilih installasi minimalis, hanya menggunakan `standard system utilities`
+* Setelah berhasil install Debian 12, power off VMnya terlebih dahulu
+* Set Network nya:
 	* Adapter 1: `NAT`
 	* Adapter 2: `Host-only Adapter`
-7. Start VMnya
+* Start VMnya
 
 ### SETTING JARINGAN
-1. Login dengan menggunakan akses `root`
-2.
-    ```
-    apt update
-    ```
-3.
-    ```
-    ip a
-    ```
-    pastikan jaringan *host-only adapter* (`enp0s8`) ada
-4.
-   ```
-   nano /etc/network/interfaces.d/enp0s8
-   ```
-6. masukan ini:
-   ```
-   auto enp0s8
-   iface enp0s8 inet static
-     address 192.168.56.101
-     netmask 255.255.255.0
-   ```
-   kemudian tekan `ctrl + o` untuk save, kemudian `ctrl + x` untuk tutup nano
-7.
-   ```
-   systemctl restart networking
-   ```
-   untuk restart networking
-9. cek kembali di 
-   ```
-   ip a
-   ```
-   apakah ip address untuk local sudah benar contoh disini saya menggunakan ipaddress statis di `192.168.56.101`
-10. test ping ke ip host dan sebaliknya. pastikan dapat terhubung kedua jaringan tersebut
+Login dengan menggunakan akses `root`
+```
+apt update
+```
+lihat status ip address dengan menggunakan:
+```
+ip a
+```
+pastikan jaringan *host-only adapter* (`enp0s8`) ada. Setelah itu, buat ip address menjadi ip statis dengan cara
+```
+nano /etc/network/interfaces.d/enp0s8
+```
+masukan ini:
+```
+auto enp0s8
+  iface enp0s8 inet static
+  address 192.168.56.101
+  netmask 255.255.255.0
+```
+kemudian tekan `ctrl + o` untuk save, kemudian `ctrl + x` untuk tutup nano, lakukan restart networking dengan cara
+```
+systemctl restart networking
+```
+setelah itu, cek kembali ip addressnya dengan cara 
+```
+ip a
+```
+apakah ip address untuk local sudah benar? contoh disini saya menggunakan ipaddress statis di `192.168.56.101`.
+
+Coba lakukan test ping ke ip host dan sebaliknya. pastikan dapat terhubung kedua jaringan tersebut
 
 ### Install Docker
-1. ```
-    apt -y install ca-certificates curl gnupg lsb-release git
-    ```
-2. 
-    ```
-    install -m 0755 -d /etc/apt/keyrings
-    ```
-3. 
-    ```
-    curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-    ```
-4. 
-    ```
-    chmod a+r /etc/apt/keyrings/docker.gpg
-    ```
-5. 
-    ```
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-    ```
-6. 
-    ```
-    apt update
-    ```
-7. 
-    ```
-    apt -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-    ```
-8. 
-    ```
-    usermod -aG docker $USER
-    ```
-9. 
-    ```
-    newgrp docker
-    ```
+Jalanin ini berurutan
+```
+apt -y install ca-certificates curl gnupg lsb-release git
+```
+```
+install -m 0755 -d /etc/apt/keyrings
+```
+```
+curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+```
+```
+chmod a+r /etc/apt/keyrings/docker.gpg
+```
+```
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+```
+```
+apt update
+```
+```
+apt -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+```
+usermod -aG docker $USER
+```
+```
+newgrp docker
+```
 
 ### Install Portainer
-1. 
-   ```
-   docker volume create portainer_data
-   ```
-2.
-   ```
-   docker run -d -p 8000:8000 -p 9443:9443 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest
-   ```
-4. 
-   ```
-   docker start portainer
-   ```
-3. Buka browser di host (PC) ketik `https://192.168.56.101:9443`, jika benar, maka akan keluar settingan awal dari portainer
-4. buat username dan password untuk admin portainer
+Lanjut ke instalasi Portainer yang berfungsi sebagai tool UI untuk Docker dan bisa diakses melalui host (PC)
+
+Jalanin ini berurutan
+```
+docker volume create portainer_data
+```
+```
+docker run -d -p 8000:8000 -p 9443:9443 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest
+```
+```
+docker start portainer
+```
+Buka browser di host (PC) ketik `https://192.168.56.101:9443`
+
+jika benar, maka akan keluar settingan awal dari portainer. Buat username dan password untuk admin portainer
 
 ### Install Redash
 1. Buat Environment terlebih dahulu dengan menggunakan wizard
@@ -122,7 +113,7 @@
 3. pilih `socket` > isikan nama environmentnya, saya menggunakan `env-docker` > klik `connect`
 4. klik home di menu sebelah kiri, pastikan `env-docker` sudah ada
 5. klik `env-docker` > `stacks` > `add stacks`
-6. copas ini ke dalam field `web editor`
+6. copas ini ke dalam field `web editor`, jangan lupa untuk mengganti `REDASH_SECRET_KEY` dan `REDASH_COOKIE_SECRET`, saya buat asal dengan nama `hogehoge` dan `mogemoge`
 ```
 version: "3"
 services:
