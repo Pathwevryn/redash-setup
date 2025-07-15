@@ -39,7 +39,7 @@ ip a
 ```
 pastikan jaringan *host-only adapter* (`enp0s8`) ada. Setelah itu, buat ip address menjadi ip statis dengan cara
 ```
-nano /etc/network/interfaces.d/enp0s8
+nano /etc/network/interfaces
 ```
 masukan ini:
 ```
